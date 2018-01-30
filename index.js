@@ -2,9 +2,8 @@ var path = require('path');
 var express = require('express');
 var app = express();
 var mongo = require('mongodb').MongoClient;
-var mongoArr = (process.env.MONGODB_URI || 'mongodb://localhost:27017/shortener').split(/(mongodb:\/\/[\w\W]*\/)/).filter(Boolean);
-var url =  process.env.MONGODB_URI;
-var database = mongoArr[1];
+var url =  process.env.MONGODB_URI || 'mongodb://localhost:27017/shortener';
+var database = process.env.MONGODB_URI.split(/(mongodb:\/\/[\w\W]*\/)/).filter(Boolean)[1] || 'shortener';
 var host = process.env.HOST_NAME || 'http://192.168.1.7:5000/';
 
 createCounter();
