@@ -1,8 +1,9 @@
 var path = require('path');
 var express = require('express');
 var mongo = require('mongodb').MongoClient;
-var url = 'mongodb://localhost:27017/';
 var app = express();
+var host = process.env.HOST_NAME || 'http://192.168.1.7:5000/';
+var url =  process.env.MONGODB_URI || 'mongodb://localhost:27017/';
 
 createCounter();
 
@@ -43,7 +44,7 @@ function shortenURL(original, callback){
         getID(function(err, data){
           client.db('shortener').collection('urls').insert({
             original: original,
-            shortened: "http://192.168.1.7:5000/" + (data + 1)
+            shortened: host + (data + 1)
           }, function(err, data){
             callback(err, {original: data.ops[0].original, shortened: data.ops[0].shortened});
             client.end;
@@ -82,7 +83,7 @@ function checkURL(find, callback){
   mongo.connect(url, function(err, client){
     if(err){return err;}
     client.db('shortener').collection('urls').find({
-      shortened: "http://192.168.1.7:5000/" + find
+      shortened: host + find
     }).toArray(function(err, data){
       callback(err, data);
     })
