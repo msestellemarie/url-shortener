@@ -44,7 +44,7 @@ function shortenURL(original, callback){
       }
       else {
         getID(function(err, data){
-          client.db('shortener').collection('urls').insert({
+          client.db(database).collection('urls').insert({
             original: original,
             shortened: host + (data + 1)
           }, function(err, data){
@@ -60,7 +60,7 @@ function shortenURL(original, callback){
 function createCounter(){
   mongo.connect(url, function(err, client){
     if(err){return err;}
-    client.db('shortener').collection('counter').insert({
+    client.db(database).collection('counter').insert({
       _id: 'userid',
       seq: 0
     })
@@ -70,7 +70,7 @@ function createCounter(){
 function getID(callback){
   mongo.connect(url, function(err, client){
     if(err){return err;}
-    client.db('shortener').collection('counter').findAndModify(
+    client.db(database).collection('counter').findAndModify(
         {_id: 'userid'},
         [],
         {$inc: {seq: 1}}
@@ -84,7 +84,7 @@ function getID(callback){
 function checkURL(find, callback){
   mongo.connect(url, function(err, client){
     if(err){return err;}
-    client.db('shortener').collection('urls').find({
+    client.db(database).collection('urls').find({
       shortened: host + find
     }).toArray(function(err, data){
       callback(err, data);
@@ -95,7 +95,7 @@ function checkURL(find, callback){
 function checkOriginalURL(find, callback){
   mongo.connect(url, function(err, client){
     if(err){return err;}
-    client.db('shortener').collection('urls').find({
+    client.db(database).collection('urls').find({
       original: find
     }).toArray(function(err, data){
       callback(err, data);
