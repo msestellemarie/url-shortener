@@ -16,8 +16,7 @@ app.get('/:id*', function(req, res){
     if(data.length !== 0){
       res.redirect(data[0].original);
     }
-    //strengthen & only add new if doesn't exist
-    else if(original.match('http') !== null){
+    else if(original.match(/^https?:\/\/www.[a-zA-Z]+.[a-zA-Z]+/) !== null){
       shortenURL(original, function(err, data){
         if(err){return err;}
         res.send(data);
@@ -36,14 +35,21 @@ app.get('/:id*', function(req, res){
 function shortenURL(original, callback){
   mongo.connect(url, function(err, client){
     if(err){return err;}
-    getID(function(err, data){
-      client.db('shortener').collection('urls').insert({
-        original: original,
-        shortened: "http://localhost:5000/" + (data + 1)
-      }, function(err, data){
-        callback(err, {original: data.ops[0].original, shortened: data.ops[0].shortened});
-        client.end;
-      })
+    checkOriginalURL(original, function(err, data){
+      if(data.length !== 0){
+        callback(err, {original: original, shortened: data[0].shortened});
+      }
+      else {
+        getID(function(err, data){
+          client.db('shortener').collection('urls').insert({
+            original: original,
+            shortened: "http://192.168.1.7:5000/" + (data + 1)
+          }, function(err, data){
+            callback(err, {original: data.ops[0].original, shortened: data.ops[0].shortened});
+            client.end;
+          })
+        })
+      }
     })
   })
 }
@@ -72,11 +78,22 @@ function getID(callback){
   })
 }
 
-function checkURL(shortened, callback){
+function checkURL(find, callback){
   mongo.connect(url, function(err, client){
     if(err){return err;}
     client.db('shortener').collection('urls').find({
-      shortened: "http://localhost:5000/" + shortened
+      shortened: "http://192.168.1.7:5000/" + find
+    }).toArray(function(err, data){
+      callback(err, data);
+    })
+  })
+}
+
+function checkOriginalURL(find, callback){
+  mongo.connect(url, function(err, client){
+    if(err){return err;}
+    client.db('shortener').collection('urls').find({
+      original: find
     }).toArray(function(err, data){
       callback(err, data);
     })
